@@ -39,12 +39,22 @@ Puppet::Functions.create_function(:hiera_ssm_paramstore) do
     end
   end
 
+  def resolve_credentials(options)
+      if options['aws_profile'].nil?
+        credentials = Aws::InstanceProfileCredentials.new()
+      else
+        credentials = Aws::SharedCredentials.new(profile_name: options['aws_profile'])
+      end
+      return credentials
+  end
+
   def ssm_get_connection(options)
     begin
+
       if options['region'].nil?
-        Aws::SSM::Client.new(:profile_name options['aws_profile'])
+        Aws::SSM::Client.new(credentials: resolve_credentials(options))
       else
-        Aws::SSM::Client.new(region: options['region'], :profile_name options['aws_profile'])
+        Aws::SSM::Client.new(region: options['region'], credentials: resolve_credentials(options))
       end
     rescue Aws::SSM::Errors::ServiceError => e
       raise Puppet::DataBinding::LookupError, "Fail to connect to aws ssm #{e.message}"
