@@ -42,7 +42,7 @@ Puppet::Functions.create_function(:hiera_ssm_paramstore) do
   def ssm_get_connection(options)
     begin
       if options['region'].nil?
-        Aws::SSM::Client.new(:profile_name "puppet")
+        Aws::SSM::Client.new(:profile_name options['aws_profile'])
       else
         Aws::SSM::Client.new(region: options['region'], :profile_name options['aws_profile'])
       end
