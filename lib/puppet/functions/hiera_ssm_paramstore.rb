@@ -40,12 +40,14 @@ Puppet::Functions.create_function(:hiera_ssm_paramstore) do
   end
 
   def resolve_credentials(options)
-      if options['aws_profile'].nil?
-        credentials = Aws::InstanceProfileCredentials.new()
-      else
-        credentials = Aws::SharedCredentials.new(profile_name: options['aws_profile'])
-      end
-      return credentials
+    priority_profile =  [ENV['AWS_PROFILE'], options['aws_profile'], "instance_profile"]
+    profile = priority_profile.find{|i| !i.nil?}
+    if profile == "instance_profile"
+      credentials = Aws::InstanceProfileCredentials.new()
+    else
+      credentials = Aws::SharedCredentials.new(profile_name: profile)
+    end
+    return credentials
   end
 
   def ssm_get_connection(options)
