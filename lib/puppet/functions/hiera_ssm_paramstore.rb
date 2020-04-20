@@ -42,9 +42,9 @@ Puppet::Functions.create_function(:hiera_ssm_paramstore) do
   def ssm_get_connection(options)
     begin
       if options['region'].nil?
-        Aws::SSM::Client.new()
+        Aws::SSM::Client.new(:profile_name "puppet")
       else
-        Aws::SSM::Client.new(region: options['region'])
+        Aws::SSM::Client.new(region: options['region'], :profile_name options['aws_profile'])
       end
     rescue Aws::SSM::Errors::ServiceError => e
       raise Puppet::DataBinding::LookupError, "Fail to connect to aws ssm #{e.message}"
